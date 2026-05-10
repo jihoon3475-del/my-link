@@ -70,6 +70,8 @@ export default function Page() {
   })
 
   const onSubmit = async (data: FormValues) => {
+    setOpen(false)
+    setIsLoading(true)
     setIsSubmitting(true)
     let finalUrl = data.url.trim()
     if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
@@ -103,12 +105,14 @@ export default function Page() {
       
       // 리셋
       form.reset()
-      setOpen(false)
     } catch (error) {
       console.error("Error adding document: ", error)
+      // 에러 발생 시 모달 다시 열기
+      setOpen(true)
       // 필요 시 에러 처리 (예: Toast 알림)
     } finally {
       setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 
