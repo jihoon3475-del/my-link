@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -28,12 +28,38 @@ import {
 } from "@/components/ui/dialog"
 import { dummyLinks, LinkItem } from "@/data/links"
 import Link from "next/link"
-import { Plus } from "lucide-react"
-import { doc, setDoc } from "firebase/firestore"
+import { Plus, Loader2 } from "lucide-react"
+import { doc, setDoc, collection, query, orderBy, getDocs } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 export default function Page() {
-  const [links, setLinks] = useState<LinkItem[]>(dummyLinks)
+  const [links, setLinks] = useState<LinkItem[]>([])
   const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      const q = query(
+        collection(db, "users", "anonymous", "links"),
+        orderBy("createdAt", "desc")
+      )
+
+      try {
+        const querySnapshot = await getDocs(q)
+        const fetchedLinks: LinkItem[] = []
+        querySnapshot.forEach((doc) => {
+          fetchedLinks.push(doc.data() as LinkItem)
+        })
+        setLinks(fetchedLinks)
+      } catch (error) {
+        console.error("Error fetching links: ", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchLinks()
+  }, [])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,6 +70,7 @@ export default function Page() {
   })
 
   const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true)
     let finalUrl = data.url.trim()
     if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
       finalUrl = `https://${finalUrl}`
@@ -80,6 +107,8 @@ export default function Page() {
     } catch (error) {
       console.error("Error adding document: ", error)
       // 필요 시 에러 처리 (예: Toast 알림)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -155,8 +184,15 @@ export default function Page() {
                   <Button type="button" variant="outline" onClick={() => { setOpen(false); form.reset(); }} className="rounded-xl h-12 w-full sm:w-auto">
                     취소
                   </Button>
-                  <Button type="submit" className="rounded-xl h-12 font-bold shadow-md hover:shadow-lg transition-all w-full sm:w-auto bg-[#3b82f6] hover:bg-[#2563eb] text-white">
-                    저장하기
+                  <Button type="submit" disabled={isSubmitting} className="rounded-xl h-12 font-bold shadow-md hover:shadow-lg transition-all w-full sm:w-auto bg-[#3b82f6] hover:bg-[#2563eb] text-white">
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        저장 중...
+                      </>
+                    ) : (
+                      "저장하기"
+                    )}
                   </Button>
                 </DialogFooter>
               </form>
@@ -166,9 +202,15 @@ export default function Page() {
 
         {/* Link List */}
         <div className="flex flex-col gap-4">
-          {links.map((link, i) => (
-            <Link
-              key={link.id}
+          {isLoading ? (
+            <div className="flex justify-center p-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[#3b82f6]" />
+            </div>
+          ) : (
+            <>
+              {links.map((link, i) => (
+                <Link
+                  key={link.id}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -193,10 +235,12 @@ export default function Page() {
               </Card>
             </Link>
           ))}
-          {links.length === 0 && (
-            <div className="text-center p-8 text-slate-500 delay-500 animate-in fade-in">
-              등록된 링크가 없습니다.
-            </div>
+              {links.length === 0 && (
+                <div className="text-center p-8 text-slate-500 delay-500 animate-in fade-in">
+                  등록된 링크가 없습니다.
+                </div>
+              )}
+            </>
           )}
         </div>
         
