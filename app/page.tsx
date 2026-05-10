@@ -66,8 +66,59 @@ export default function Page() {
   return (
     <div className="flex min-h-[100dvh] flex-col items-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 p-6 sm:py-16 overflow-hidden">
       <div className="flex w-full max-w-md flex-col gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both">
+        {/* Action Buttons (Top) */}
+        <div className="flex justify-center w-full sm:absolute sm:top-0 sm:right-[-4rem] sm:w-auto sm:justify-end z-50 mt-[-1rem] sm:mt-0">
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger render={<Button className="rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 bg-slate-900/90 hover:bg-slate-900 dark:bg-white/90 dark:hover:bg-white text-white dark:text-slate-900 font-bold px-6 py-6 backdrop-blur-md" />}>
+                <Plus className="mr-2 h-5 w-5" />
+                새 링크 추가
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-3xl w-[95vw] border-0 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">새 링크 추가</DialogTitle>
+                <DialogDescription>
+                  추가할 링크의 제목과 URL을 입력해주세요.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddLink} className="space-y-5 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="font-semibold text-slate-700 dark:text-slate-300">링크 제목</Label>
+                  <Input
+                    id="title"
+                    placeholder="예: Instagram, 포트폴리오"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="rounded-xl h-12 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="url" className="font-semibold text-slate-700 dark:text-slate-300">URL (웹 주소)</Label>
+                  <Input
+                    id="url"
+                    placeholder="예: instagram.com/myprofile"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    className="rounded-xl h-12 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus-visible:ring-primary/50"
+                  />
+                  <p className="text-xs text-slate-500 font-medium ml-1">
+                    http:// 또는 https:// 가 없으면 자동으로 추가됩니다.
+                  </p>
+                </div>
+                <DialogFooter className="pt-4 flex-col sm:flex-row gap-3">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-xl h-12 w-full sm:w-auto">
+                    취소
+                  </Button>
+                  <Button type="submit" className="rounded-xl h-12 font-bold shadow-md hover:shadow-lg transition-all w-full sm:w-auto">
+                    저장하기
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
         {/* Profile Header */}
-        <div className="flex flex-col items-center gap-5 mt-4">
+        <div className="flex flex-col items-center gap-5 mt-4 sm:mt-8">
           <div className="relative group">
             <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 text-4xl font-black text-slate-800 dark:text-white shadow-xl ring-1 ring-slate-900/5 dark:ring-white/10 z-10 transition-transform duration-500 group-hover:scale-105">
               M
@@ -81,55 +132,6 @@ export default function Page() {
               디지털 명함, 모든 링크를 한 곳에.
             </p>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-center -mt-2">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger render={<Button className="w-full rounded-2xl h-12 text-base font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" />}>
-              <Plus className="mr-2 h-5 w-5" />
-              새 링크 추가
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md rounded-2xl w-[95vw]">
-              <DialogHeader>
-                <DialogTitle>새 링크 추가</DialogTitle>
-                <DialogDescription>
-                  추가할 링크의 제목과 URL을 입력해주세요.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleAddLink} className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">링크 제목</Label>
-                  <Input
-                    id="title"
-                    placeholder="예: Instagram, 포트폴리오"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="url">URL (웹 주소)</Label>
-                  <Input
-                    id="url"
-                    placeholder="예: instagram.com/myprofile"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                  />
-                  <p className="text-xs text-slate-500">
-                    http:// 또는 https:// 가 없으면 자동으로 추가됩니다.
-                  </p>
-                </div>
-                <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                    취소
-                  </Button>
-                  <Button type="submit">
-                    저장하기
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Link List */}
