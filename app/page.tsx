@@ -29,7 +29,8 @@ import {
 import { dummyLinks, LinkItem } from "@/data/links"
 import Link from "next/link"
 import { Plus } from "lucide-react"
-
+import { doc, setDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 export default function Page() {
   const [links, setLinks] = useState<LinkItem[]>(dummyLinks)
   const [open, setOpen] = useState(false)
@@ -42,7 +43,7 @@ export default function Page() {
     },
   })
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     let finalUrl = data.url.trim()
     if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
       finalUrl = `https://${finalUrl}`
@@ -66,11 +67,20 @@ export default function Page() {
       createdAt: new Date().toISOString(),
     }
 
-    setLinks([newLink, ...links])
-    
-    // 리셋
-    form.reset()
-    setOpen(false)
+    try {
+      // Firestore에 문서 저장 (경로: users/anonymous/links/{id})
+      const linkRef = doc(db, "users", "anonymous", "links", newLink.id)
+      await setDoc(linkRef, newLink)
+
+      setLinks([newLink, ...links])
+      
+      // 리셋
+      form.reset()
+      setOpen(false)
+    } catch (error) {
+      console.error("Error adding document: ", error)
+      // 필요 시 에러 처리 (예: Toast 알림)
+    }
   }
 
   return (
